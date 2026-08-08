@@ -1,0 +1,1806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sam Ceasar — Command Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Montserrat:wght@300;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --onyx:#050505;
+    --panel:#0F0E0C;
+    --panel-2:#161310;
+    --hairline:#2B2519;
+    --hairline-2:#1C1811;
+    --gold:#C9A227;
+    --gold-bright:#EFCD6E;
+    --gold-hi:#FBE7A6;
+    --gold-dim:#4E3F14;
+    --cream:#F4EFE2;
+    --muted:#93897A;
+    --muted-dim:#5E564A;
+    --alert-crit:#5E1F1F;
+    --alert-crit-bright:#B34C42;
+    --ok-green:#5C7A4F;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--onyx);color:var(--cream);font-family:'Inter',sans-serif;}
+  ::selection{background:var(--gold);color:var(--onyx);}
+  a{color:inherit;}
+
+  .wrap{max-width:1120px;margin:0 auto;padding:20px 16px 90px;}
+
+  /* ---------- CREST ---------- */
+  .crest{width:50px;height:50px;border:1.5px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;flex-shrink:0;background:radial-gradient(circle at 50% 30%, rgba(201,162,39,.12), transparent 70%);}
+  .crest .crown{position:absolute;top:-8px;left:50%;transform:translateX(-50%);width:20px;height:11px;background:var(--gold-bright);clip-path:polygon(0% 100%, 14% 25%, 32% 65%, 50% 5%, 68% 65%, 86% 25%, 100% 100%);}
+  .crest .letters{font-family:'Montserrat',sans-serif;font-weight:800;font-size:15px;letter-spacing:.5px;color:var(--gold-bright);}
+
+  /* ---------- MASTHEAD ---------- */
+  .masthead{
+    position:relative;
+    border:1px solid var(--hairline);
+    background:
+      radial-gradient(120% 140% at 15% -10%, rgba(201,162,39,.14), transparent 55%),
+      radial-gradient(120% 140% at 100% 0%, rgba(201,162,39,.06), transparent 50%),
+      var(--panel);
+    padding:22px 22px 18px; margin:0 0 18px;
+    border-radius:8px;
+    overflow:hidden;
+  }
+  .eyebrow-row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+  .eyebrow-left{display:flex;align-items:center;gap:12px;}
+  .eyebrow{
+    font-family:'Montserrat',sans-serif; font-weight:600; font-size:10.5px; letter-spacing:.22em; text-transform:uppercase;
+    color:var(--muted);
+  }
+  .clock-pill{
+    font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.06em;
+    color:var(--muted); border:1px solid var(--hairline); border-radius:20px; padding:4px 12px;
+  }
+  .clock-pill b{color:var(--gold-bright);font-weight:600;}
+
+  h1.title{
+    font-family:'Alex Brush',cursive; font-weight:400;
+    font-size:clamp(40px,8vw,64px); line-height:1;
+    margin:16px 0 0;
+    background:linear-gradient(180deg,var(--gold-hi) 0%, var(--gold) 65%, #9c7c1e 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .title-sub{
+    font-family:'Montserrat',sans-serif; font-weight:800; font-size:clamp(15px,2.6vw,20px);
+    letter-spacing:.12em; text-transform:uppercase; color:var(--cream); margin:2px 0 14px;
+  }
+  .subtitle{font-size:13px;color:var(--muted);margin:2px 0 18px;line-height:1.5;}
+  .subtitle b{color:var(--cream);font-weight:600;}
+
+  .ready-row{
+    display:grid; grid-template-columns:auto auto 1fr auto; gap:14px; align-items:center;
+    border-top:1px solid var(--hairline); padding-top:16px;
+  }
+  .ready-toggle{
+    font-family:'Montserrat',sans-serif; font-size:11.5px; letter-spacing:.1em; text-transform:uppercase;
+    padding:11px 16px; border-radius:5px; cursor:pointer; border:1.5px solid var(--gold-dim);
+    background:transparent; color:var(--muted); font-weight:700; white-space:nowrap;
+    transition:.15s;
+  }
+  .ready-toggle .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--muted-dim);margin-right:8px;}
+  .ready-toggle.on{
+    background:linear-gradient(180deg,var(--gold-bright),var(--gold));
+    color:var(--onyx); border-color:var(--gold-bright);
+    box-shadow:0 0 22px rgba(201,162,39,.3);
+  }
+  .ready-toggle.on .dot{background:var(--onyx);}
+
+  .sam-status select{
+    font-family:'Montserrat',sans-serif; font-size:11px; letter-spacing:.06em; text-transform:uppercase; font-weight:600;
+    background:var(--onyx); border:1.5px solid var(--hairline); color:var(--gold-bright);
+    padding:10px 12px; border-radius:5px; cursor:pointer;
+  }
+  .sam-status .ss-label{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;}
+
+  .next-up{text-align:left;min-width:0;}
+  .next-up .nu-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;}
+  .next-up .nu-name{font-family:'Montserrat',sans-serif;font-weight:700;font-size:clamp(15px,3vw,18px);margin:2px 0;}
+  .next-up .nu-detail{font-size:11.5px;color:var(--muted);}
+
+  .countdown{
+    font-family:'JetBrains Mono',monospace; font-weight:700;
+    font-size:clamp(20px,4vw,26px);
+    color:var(--gold-bright); text-align:right; white-space:nowrap;
+  }
+  .countdown .cd-label{display:block;font-size:9px;font-weight:400;letter-spacing:.14em;color:var(--muted);text-align:right;margin-bottom:2px;}
+
+  @media(max-width:760px){ .ready-row{grid-template-columns:1fr 1fr;} .countdown{text-align:left;grid-column:span 2;} .countdown .cd-label{text-align:left;} }
+
+  /* ---------- SNAPSHOT STRIP ---------- */
+  .snapshot{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:1px;
+    background:var(--hairline); border:1px solid var(--hairline); border-radius:6px; overflow:hidden;
+    margin:0 0 18px;
+  }
+  .snap-cell{background:var(--panel); padding:14px 16px;}
+  .snap-num{font-family:'Montserrat',sans-serif;font-weight:800;font-size:23px;color:var(--gold-bright);}
+  .snap-label{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:2px;}
+  @media(max-width:640px){ .snapshot{grid-template-columns:repeat(2,1fr);} }
+
+  /* ---------- ALERTS ---------- */
+  .alerts{margin:0 0 22px;display:flex;flex-direction:column;gap:8px;}
+  .alert{
+    border-radius:5px; padding:12px 14px; font-size:13px; line-height:1.5;
+    display:flex; gap:10px; align-items:flex-start; border:1px solid;
+  }
+  .alert .a-tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;flex-shrink:0;margin-top:1px;}
+  .alert.crit{background:rgba(94,31,31,.18); border-color:rgba(179,76,66,.5);}
+  .alert.crit .a-tag{color:var(--alert-crit-bright);}
+  .alert.warn{background:rgba(201,162,39,.08); border-color:rgba(201,162,39,.4);}
+  .alert.warn .a-tag{color:var(--gold-bright);}
+  .alert.info{background:rgba(147,137,122,.08); border-color:var(--hairline);}
+  .alert.info .a-tag{color:var(--muted);}
+  .alert .a-body b{color:var(--cream);}
+  .alert-empty{font-size:13px;color:var(--muted);font-style:italic;padding:10px 2px;}
+
+  /* ---------- TABS ---------- */
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;}
+  .tab-btn{
+    font-family:'Montserrat',sans-serif; font-weight:600; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
+    background:var(--panel); border:1px solid var(--hairline); color:var(--muted);
+    padding:9px 13px; border-radius:3px; cursor:pointer; transition:.15s; position:relative;
+  }
+  .tab-btn:hover{color:var(--cream); border-color:var(--gold-dim);}
+  .tab-btn.active{background:var(--gold-dim); color:var(--gold-bright); border-color:var(--gold); font-weight:700;}
+  .tab-btn.active::after{
+    content:""; position:absolute; left:10px; right:10px; bottom:-7px; height:2px; background:var(--gold);
+  }
+
+  .view{display:none;}
+  .view.active{display:block;}
+
+  /* ---------- SECTION / CARD SHELL ---------- */
+  .section{
+    border:1px solid var(--hairline); background:var(--panel); border-radius:6px;
+    margin-bottom:16px; overflow:hidden;
+  }
+  .section-head{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:14px 16px; border-bottom:1px solid var(--hairline);
+    background:var(--panel-2);
+  }
+  .section-title{font-family:'Montserrat',sans-serif;font-weight:800;font-size:14.5px;letter-spacing:.05em;text-transform:uppercase;}
+  .section-sub{font-size:11.5px;color:var(--muted);margin-top:2px;}
+  .section-body{padding:14px 16px;}
+  .btn-gold{
+    font-family:'Montserrat',sans-serif; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
+    background:linear-gradient(180deg,var(--gold-bright),var(--gold)); color:var(--onyx); font-weight:800;
+    border:none; padding:9px 16px; border-radius:4px; cursor:pointer;
+  }
+  .btn-ghost{
+    font-family:'Montserrat',sans-serif; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
+    background:transparent; color:var(--muted); font-weight:700;
+    border:1px solid var(--hairline); padding:9px 14px; border-radius:4px; cursor:pointer;
+  }
+  .btn-ghost:hover{color:var(--cream);border-color:var(--gold-dim);}
+  .btn-danger{
+    font-family:'Montserrat',sans-serif; font-size:10px; letter-spacing:.05em; text-transform:uppercase;
+    background:transparent; color:var(--alert-crit-bright); border:1px solid rgba(179,76,66,.4);
+    padding:6px 10px; border-radius:4px; cursor:pointer;
+  }
+
+  input[type=text],input[type=number],input[type=date],input[type=time],input[type=tel],textarea,select{
+    background:var(--onyx); border:1px solid var(--hairline); color:var(--cream);
+    font-family:'Inter',sans-serif; font-size:13px; padding:8px 10px; border-radius:4px; width:100%;
+  }
+  input::placeholder,textarea::placeholder{color:var(--muted-dim);}
+  label.field{display:flex;flex-direction:column;gap:5px;font-size:11px;color:var(--muted);letter-spacing:.03em;}
+  .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:12px;}
+  .form-actions{display:flex;gap:10px;margin-top:6px;}
+
+  /* ---------- APPOINTMENT / CONSULT CARDS ---------- */
+  .appt-card{border:1px solid var(--hairline);border-radius:5px;margin-bottom:10px;overflow:hidden;background:var(--panel-2);}
+  .appt-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;cursor:pointer;flex-wrap:wrap;}
+  .appt-time{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--gold-bright);min-width:58px;}
+  .appt-main{flex:1;min-width:160px;}
+  .appt-client{font-family:'Montserrat',sans-serif;font-weight:700;font-size:14.5px;}
+  .appt-service{font-size:12px;color:var(--muted);margin-top:1px;}
+  .appt-badges{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+  .badge{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:20px;border:1px solid;white-space:nowrap;}
+  .badge.shop{color:var(--muted);border-color:var(--hairline);}
+  .badge.mobile{color:var(--gold-bright);border-color:var(--gold-dim);}
+  .badge.private{color:var(--gold-bright);border-color:var(--gold-dim);}
+  .badge.status-scheduled{color:var(--muted);border-color:var(--hairline);}
+  .badge.status-completed{color:var(--ok-green);border-color:rgba(92,122,79,.5);}
+  .badge.status-cancelled{color:var(--alert-crit-bright);border-color:rgba(179,76,66,.4);}
+  .appt-price{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--cream);}
+  .appt-progress-wrap{width:70px;flex-shrink:0;}
+  .bar-track{height:6px;border-radius:5px;background:var(--onyx);border:1px solid var(--hairline);overflow:hidden;}
+  .bar-fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold));transition:width .3s ease;}
+  .appt-body{padding:4px 14px 14px;display:none;border-top:1px dashed var(--hairline);}
+  .appt-card.open .appt-body{display:block;}
+  .appt-card.open .chev{transform:rotate(180deg);}
+  .chev{color:var(--muted);transition:transform .2s;font-size:11px;}
+
+  .checklist-title{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-bright);margin:14px 0 4px;}
+  .item-row{display:flex;align-items:flex-start;gap:10px;padding:7px 0;border-bottom:1px solid rgba(43,37,25,.6);}
+  .item-row:last-child{border-bottom:none;}
+  .item-row.checked .item-text{color:var(--muted); text-decoration:line-through; text-decoration-color:var(--hairline);}
+  .checkbox{
+    appearance:none; -webkit-appearance:none; width:18px; height:18px; flex-shrink:0; margin-top:1px;
+    border:1.5px solid var(--muted-dim); border-radius:4px; cursor:pointer; position:relative; background:transparent;
+  }
+  .checkbox:checked{background:var(--gold); border-color:var(--gold-bright);}
+  .checkbox:checked::after{
+    content:"\2713"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:700; color:var(--onyx);
+  }
+  .item-text{font-size:13.5px; flex:1; padding-top:1px;}
+
+  .appt-actions-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;align-items:center;}
+  .mini-select{width:auto;min-width:130px;}
+
+  /* ---------- LIST ROWS ---------- */
+  .list-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--hairline-2);flex-wrap:wrap;}
+  .list-row:last-child{border-bottom:none;}
+  .list-name{font-family:'Montserrat',sans-serif;font-weight:700;font-size:14px;}
+  .list-sub{font-size:11.5px;color:var(--muted);margin-top:2px;}
+  .list-stat{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--gold-bright);text-align:right;}
+  .list-stat-sub{font-size:10.5px;color:var(--muted);text-align:right;}
+
+  /* ---------- DASHBOARD ---------- */
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--hairline);border:1px solid var(--hairline);border-radius:6px;overflow:hidden;margin-bottom:18px;}
+  .stat-cell{background:var(--panel);padding:16px;}
+  .stat-num{font-family:'Montserrat',sans-serif;font-weight:800;font-size:24px;color:var(--gold-bright);}
+  .stat-label{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:3px;}
+
+  .chart-row{display:flex;align-items:flex-end;gap:10px;height:140px;padding:10px 4px 0;}
+  .chart-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end;}
+  .chart-bar{width:100%;max-width:34px;border-radius:3px 3px 0 0;background:linear-gradient(180deg,var(--gold-bright),var(--gold-dim));min-height:2px;}
+  .chart-label{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--muted);}
+  .chart-val{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--gold-bright);}
+
+  .hbar-row{display:flex;align-items:center;gap:10px;padding:8px 0;}
+  .hbar-label{width:150px;flex-shrink:0;font-size:12.5px;}
+  .hbar-track{flex:1;height:9px;border-radius:5px;background:var(--onyx);border:1px solid var(--hairline);overflow:hidden;}
+  .hbar-fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold));}
+  .hbar-val{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold-bright);width:66px;text-align:right;flex-shrink:0;}
+
+  /* ---------- PROMO / REVIEW / PARTNER CARDS ---------- */
+  .promo-card{border:1px solid var(--hairline);border-radius:5px;padding:12px 14px;margin-bottom:10px;background:var(--panel-2);}
+  .promo-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
+  .promo-title{font-family:'Montserrat',sans-serif;font-weight:700;font-size:14px;}
+  .promo-desc{font-size:12.5px;color:var(--muted);margin-top:4px;line-height:1.5;}
+  .idea-strip{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;}
+  .idea-chip{font-size:11.5px;border:1px dashed var(--hairline);border-radius:20px;padding:6px 12px;color:var(--muted);}
+  .idea-chip b{color:var(--gold-bright);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;margin-right:6px;}
+
+  .stars{font-size:14px;letter-spacing:2px;color:var(--gold-bright);}
+
+  .photo-thumb{width:100%;max-width:120px;height:80px;object-fit:cover;border-radius:4px;border:1px solid var(--hairline);}
+  .photo-slot{display:flex;flex-direction:column;gap:6px;}
+  .photo-slot-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
+
+  .intake-q{margin-bottom:12px;}
+  .intake-q label{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.04em;color:var(--gold-bright);display:block;margin-bottom:5px;}
+
+  .lock-note{font-size:11px;color:var(--muted);font-style:italic;display:flex;align-items:center;gap:6px;margin-top:8px;}
+
+  .staff-card{border:1px solid var(--hairline);border-radius:5px;padding:14px;background:var(--panel-2);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;}
+  .staff-name{font-family:'Montserrat',sans-serif;font-weight:700;font-size:15px;}
+  .staff-role{font-size:11.5px;color:var(--muted);margin-top:2px;}
+
+  footer{text-align:center;margin-top:30px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;letter-spacing:.05em;}
+  footer .print-btn{
+    background:transparent;border:1px solid var(--hairline);color:var(--muted);
+    font-family:'JetBrains Mono',monospace;font-size:11px;padding:7px 14px;border-radius:20px;cursor:pointer;margin-top:10px;
+  }
+  footer .print-btn:hover{color:var(--cream);border-color:var(--gold-dim);}
+
+  .empty-state{font-size:13px;color:var(--muted);font-style:italic;padding:18px 4px;text-align:center;}
+
+  @media print{
+    body{background:#fff;color:#000;}
+    .masthead,.section,.snapshot,.stat-grid{background:#fff;border-color:#ccc;}
+    .tabs,.alerts,footer .print-btn,.form-actions,.appt-actions-row{display:none !important;}
+    .view{display:block !important;}
+    .appt-body{display:block !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="masthead">
+    <div class="eyebrow-row">
+      <div class="eyebrow-left">
+        <div class="crest"><div class="crown"></div><div class="letters">SC</div></div>
+        <span class="eyebrow">Philadelphia, PA — Flagship Location · In Partnership With FLI Nation Grooming Lounge</span>
+      </div>
+      <span class="clock-pill" id="liveClock">--:--:--</span>
+    </div>
+    <h1 class="title">Sam Ceasar</h1>
+    <div class="title-sub">Command Center</div>
+    <p class="subtitle">Confidence isn't just restored — it's redefined. <b>Barbering, cranial prosthetic &amp; medical wig consultations,</b> and shop operations that keep running whether Sam is in the chair, teaching a class, or in a private consultation.</p>
+
+    <div class="ready-row">
+      <button class="ready-toggle" id="readyToggle"><span class="dot"></span><span id="readyText">PREP MODE</span></button>
+
+      <div class="sam-status">
+        <div class="ss-label">Sam's Status</div>
+        <select id="samStatusSel">
+          <option value="in">In Shop</option>
+          <option value="consulting">Private Consultation</option>
+          <option value="teaching">Teaching a Class</option>
+          <option value="off">Off</option>
+        </select>
+      </div>
+
+      <div class="next-up" id="nextUp">
+        <div class="nu-label">Next in Chair</div>
+        <div class="nu-name" id="nuName">No appointments booked today</div>
+        <div class="nu-detail" id="nuDetail">Add one from the Today tab.</div>
+      </div>
+
+      <div class="countdown">
+        <span class="cd-label" id="cdLabel">TIME TO NEXT</span>
+        <span id="cdValue">--:--:--</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="snapshot" id="snapshot"></div>
+
+  <div class="alerts" id="alerts"></div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-view="today">📅 Today</button>
+    <button class="tab-btn" data-view="shop">🏪 Shop Ops</button>
+    <button class="tab-btn" data-view="services">✂️ Barber Services</button>
+    <button class="tab-btn" data-view="consultations">👑 Consultations</button>
+    <button class="tab-btn" data-view="clients">👤 Clients</button>
+    <button class="tab-btn" data-view="staff">🧑‍🔧 Staff</button>
+    <button class="tab-btn" data-view="payments">💳 Payments</button>
+    <button class="tab-btn" data-view="photos">📸 Before/After</button>
+    <button class="tab-btn" data-view="reviews">⭐ Reviews</button>
+    <button class="tab-btn" data-view="marketing">📣 Marketing</button>
+    <button class="tab-btn" data-view="partners">🤝 Partners</button>
+    <button class="tab-btn" data-view="dashboard">📊 Dashboard</button>
+    <button class="tab-btn" data-view="mobile">🚗 Mobile / A La Carte</button>
+  </div>
+
+  <!-- TODAY -->
+  <div class="view active" id="view-today">
+    <div class="section">
+      <div class="section-head">
+        <div>
+          <div class="section-title">Today's Schedule</div>
+          <div class="section-sub" id="todayDateLabel"></div>
+        </div>
+        <button class="btn-gold" id="addApptBtn">+ Book Appointment</button>
+      </div>
+      <div class="section-body">
+        <div id="apptForm" style="display:none;margin-bottom:18px;"></div>
+        <div id="apptList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHOP OPS -->
+  <div class="view" id="view-shop">
+    <div class="section">
+      <div class="section-head"><div><div class="section-title">Opening Checklist</div><div class="section-sub">Before the first client sits down</div></div><span class="section-sub" id="cnt-opening"></span></div>
+      <div class="section-body" id="body-opening"></div>
+    </div>
+    <div class="section">
+      <div class="section-head"><div><div class="section-title">Sanitation &amp; Station Prep</div><div class="section-sub">Shop-wide sanitation, run each morning and between rushes</div></div><span class="section-sub" id="cnt-sanitation"></span></div>
+      <div class="section-body" id="body-sanitation"></div>
+    </div>
+    <div class="section">
+      <div class="section-head"><div><div class="section-title">Closing Checklist</div><div class="section-sub">Last client out the door to lock-up</div></div><span class="section-sub" id="cnt-closing"></span></div>
+      <div class="section-body" id="body-closing"></div>
+    </div>
+  </div>
+
+  <!-- SERVICES -->
+  <div class="view" id="view-services">
+    <div class="section">
+      <div class="section-head">
+        <div><div class="section-title">Barber Services &amp; Pricing</div><div class="section-sub">The menu clients book from</div></div>
+        <button class="btn-gold" id="addServiceBtn">+ Add Service</button>
+      </div>
+      <div class="section-body">
+        <div id="serviceForm" style="display:none;margin-bottom:16px;"></div>
+        <div id="serviceList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONSULTATIONS -->
+  <div class="view" id="view-consultations">
+    <div class="section">
+      <div class="section-head">
+        <div><div class="section-title">Cranial Prosthetic &amp; Medical Wig Consultations</div><div class="section-sub">Private · appointment only · discreet, personalized, professional</div></div>
+        <button class="btn-gold" id="addConsultBtn">+ New Consultation</button>
+      </div>
+      <div class="section-body">
+        <div id="consultForm" style="display:none;margin-bottom:18px;"></div>
+        <div id="consultList"></div>
+        <div class="lock-note">🔒 Consultation records stay in this tab only — never mixed into the general client roster.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLIENTS -->
+  <div class="view" id="view-clients">
+    <div class="section">
+      <div class="section-head">
+        <div><div class="section-title">Client Roster</div><div class="section-sub">History, contact info &amp; notes — barbering clients</div></div>
+        <button class="btn-gold" id="addClientBtn">+ Add Client</button>
+      </div>
+      <div class="section-body">
+        <div id="clientForm" style="display:none;margin-bottom:16px;"></div>
+        <div id="clientList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STAFF -->
+  <div class="view" id="view-staff">
+    <div class="section">
+      <div class="section-head">
+        <div><div class="section-title">Staff &amp; Coverage</div><div class="section-sub">Who's working today — the shop keeps earning even when Sam steps away</div></div>
+        <button class="btn-gold" id="addStaffBtn">+ Add Barber</button>
+      </div>
+      <div class="section-body">
+        <div id="staffForm" style="display:none;margin-bottom:16px;"></div>
+        <div id="staffList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAYMENTS -->
+  <div class="view" id="view-payments">
+    <div class="stat-grid" id="paySnap"></div>
+    <div class="section">
+      <div class="section-head"><div class="section-title">Payment Log</div></div>
+      <div class="section-body" id="paymentList"></div>
+    </div>
+  </div>
+
+  <!-- PHOTOS -->
+  <div class="view" id="view-photos">
+    <div class="section">
+      <div class="section-head"><div><div class="section-title">Before / After Photos</div><div class="section-sub">Attached per appointment — used for the portfolio and social proof</div></div></div>
+      <div class="section-body" id="photoList"></div>
+    </div>
+  </div>
+
+  <!-- REVIEWS -->
+  <div class="view" id="view-reviews">
+    <div class="section">
+      <div class="section-head"><div><div class="section-title">Reviews &amp; Client Follow-Up</div><div class="section-sub">Every completed appointment that requested a review lands here</div></div></div>
+      <div class="section-body" id="reviewList"></div>
+    </div>
+  </div>
+
+  <!-- MARKETING -->
+  <div class="view" id="view-marketing">
+    <div class="section">
+      <div class="section-head">
+        <div><div class="section-title">Marketing &amp; Promotions</div><div class="section-sub">Active campaigns and what's next</div></div>
+        <button class="btn-gold" id="addPromoBtn">+ New Promo</button>
+      </div>
+      <div class="section-body">
+        <div id="promoForm" style="display:none;margin-bottom:16px;"></div>
+        <div id="promoList"></div>
+        <div class="idea-strip" id="ideaStrip"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PARTNERS -->
+  <div class="view" id="view-partners">
+    <div class="section">
+      <div class="section-head">
+        <div><div class="section-title">Partners &amp; Referral Network</div><div class="section-sub">FLI Nation Grooming Lounge · Groom Factory Foundation · and beyond</div></div>
+        <button class="btn-gold" id="addPartnerBtn">+ Add Partner</button>
+      </div>
+      <div class="section-body">
+        <div id="partnerForm" style="display:none;margin-bottom:16px;"></div>
+        <div id="partnerList"></div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-head">
+        <div><div class="section-title">Referral Log</div></div>
+        <button class="btn-gold" id="addReferralBtn">+ Log Referral</button>
+      </div>
+      <div class="section-body">
+        <div id="referralForm" style="display:none;margin-bottom:16px;"></div>
+        <div id="referralList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="view" id="view-dashboard">
+    <div class="stat-grid" id="dashStats"></div>
+    <div class="section">
+      <div class="section-head"><div class="section-title">Revenue — Last 7 Days</div></div>
+      <div class="section-body"><div class="chart-row" id="revChart"></div></div>
+    </div>
+    <div class="section">
+      <div class="section-head"><div class="section-title">Revenue by Stream</div></div>
+      <div class="section-body" id="revStream"></div>
+    </div>
+    <div class="section">
+      <div class="section-head"><div class="section-title">Top Services by Revenue</div></div>
+      <div class="section-body" id="topServices"></div>
+    </div>
+  </div>
+
+  <!-- MOBILE -->
+  <div class="view" id="view-mobile">
+    <div class="section">
+      <div class="section-head"><div><div class="section-title">Mobile / A La Carte Appointments</div><div class="section-sub">Optional add-on service — travel details &amp; route status</div></div></div>
+      <div class="section-body" id="mobileApptList"></div>
+    </div>
+    <div class="section">
+      <div class="section-head"><div><div class="section-title">Mobile Kit — Master Packing Checklist</div><div class="section-sub">Run once before heading out for a mobile day</div></div><span class="section-sub" id="cnt-kit"></span></div>
+      <div class="section-body" id="body-kit"></div>
+    </div>
+  </div>
+
+  <footer>
+    SAM CEASAR — Philadelphia, PA · In Partnership With FLI Nation Grooming Lounge · Groom Factory Foundation<br>
+    <button type="button" class="print-btn" onclick="window.print();">Print / Export Day Sheet</button>
+  </footer>
+
+</div>
+
+<script>
+/* ================= UTIL ================= */
+function uid(){ return Math.random().toString(36).slice(2,10); }
+function todayStr(){ const d=new Date(); return d.toISOString().slice(0,10); }
+function fmtMoney(n){ return '$'+(Math.round((n||0)*100)/100).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0}); }
+function fmtTime12(t){
+  if(!t) return '';
+  const [h,m] = t.split(':').map(Number);
+  const ap = h>=12?'PM':'AM';
+  const hh = ((h+11)%12)+1;
+  return `${hh}:${String(m).padStart(2,'0')} ${ap}`;
+}
+function dayLabel(dstr){
+  const d = new Date(dstr+'T00:00:00');
+  return d.toLocaleDateString('en-US',{weekday:'long', month:'short', day:'numeric'});
+}
+function escAttr(s){ return String(s||'').replace(/"/g,'&quot;'); }
+
+/* ================= STATIC DATA ================= */
+const CLIENT_READY_ITEMS = [
+  {id:'confirmed', label:'Client confirmed'},
+  {id:'service',   label:'Service selected'},
+  {id:'apptok',    label:'Appointment confirmed'},
+  {id:'barber',    label:'Barber assigned'},
+  {id:'notes',     label:'Client notes reviewed'},
+  {id:'station',   label:'Station ready'},
+  {id:'clippers',  label:'Clippers sanitized'},
+  {id:'trimmers',  label:'Trimmers sanitized'},
+  {id:'guards',    label:'Guards ready'},
+  {id:'cape',      label:'Cape ready'},
+  {id:'towels',    label:'Towels ready'},
+  {id:'products',  label:'Products ready'},
+  {id:'paymethod', label:'Payment method confirmed'},
+  {id:'before',    label:'Before photo'},
+  {id:'cut',       label:'Haircut completed'},
+  {id:'after',     label:'After photo'},
+  {id:'paid',      label:'Payment collected'},
+  {id:'review',    label:'Client review requested'}
+];
+
+const MOBILE_READY_ITEMS = [
+  {id:'m_address',  label:'Client address confirmed'},
+  {id:'m_travelfee',label:'Travel fee set'},
+  {id:'m_traveltime',label:'Travel time estimated'},
+  {id:'m_window',   label:'Appointment window confirmed'},
+  {id:'m_kit',      label:'Mobile equipment checklist packed'},
+  {id:'m_deposit',  label:'Payment / deposit confirmed'},
+  {id:'m_route',    label:'Route / travel status updated'}
+];
+
+const CONSULT_READY_ITEMS = [
+  {id:'inquiry',    label:'Inquiry confirmed'},
+  {id:'discovery',  label:'Discovery call completed'},
+  {id:'intake',     label:'Life & hair-health intake completed'},
+  {id:'scheduled',  label:'In-person consultation scheduled'},
+  {id:'consulted',  label:'Consultation completed'},
+  {id:'measured',   label:'Measurements taken'},
+  {id:'ordered',    label:'Custom solution ordered'},
+  {id:'fitscheduled', label:'Fitting scheduled'},
+  {id:'fitted',     label:'Fitting completed'},
+  {id:'insurance',  label:'Insurance assistance status updated'},
+  {id:'followup',   label:'Follow-up scheduled'},
+  {id:'privacy',    label:'Confidentiality & privacy confirmed'}
+];
+
+const INTAKE_QUESTIONS = [
+  {id:'stress',    q:"How has your stress been lately? (scale 1–10)"},
+  {id:'sleep',     q:"What's your sleep like at night?"},
+  {id:'work',      q:"What's going on at work or in your business?"},
+  {id:'home',      q:"How's your home life?"},
+  {id:'eating',    q:'How would you describe your eating habits?'},
+  {id:'exercise',  q:'Do you exercise regularly?'},
+  {id:'changes',   q:'Have you been through any recent changes or losses?'},
+  {id:'screen',    q:'How much screen time do you have before bed?'}
+];
+
+const OPENING_ITEMS = ['Unlock shop','Lights & sound on','Review today\'s book','Restock retail shelf','Turn on OPEN sign','Confirm appointment reminders sent','Cash drawer counted','Card reader / POS online'];
+const SANITATION_ITEMS = ['Barbicide jars filled','All clippers sanitized','All trimmers sanitized','Combs & brushes sanitized','Fresh towels stocked','Fresh capes stocked','Chairs disinfected','Station surfaces wiped down','Floor swept','Trash emptied'];
+const CLOSING_ITEMS = ['All stations sanitized','Tomorrow\'s book reviewed','Drawer counted & logged','Daily revenue recorded','Retail shelf restocked','Product cabinet locked','Equipment powered off','Trash taken out','Doors locked','Alarm set'];
+const KIT_ITEMS = ['Clipper set + blades','Trimmer set','Guard set (full range)','Cape(s)','Towels ×4','Barbicide / spray sanitizer','Styling products','Charger / power bank','Extension cord','Portable floor mat','Mirror','Portable chair or stool','Broom & dustpan','Card reader / payment device'];
+
+const IDEAS = [
+  ['REFERRAL','Give existing clients a discount code to share — reward both sides when it books.'],
+  ['LOYALTY CARD','Every 8th cut free. Track punches at checkout.'],
+  ['BOOKING LINK','Put a direct booking link in the Instagram bio and story highlights.'],
+  ['PRIVATE CONSULT','Promote "Schedule Your Private Consultation" for the prosthetic/wig line — separate CTA from haircut booking.'],
+  ['SEASONAL','Back-to-school and holiday fade specials, time-boxed to create urgency.']
+];
+
+/* ================= SEED STATE ================= */
+function seedState(){
+  const today = todayStr();
+  const services = [
+    {id:uid(), name:'Classic Haircut', price:45, duration:30},
+    {id:uid(), name:'Haircut + Beard Line-Up', price:65, duration:45},
+    {id:uid(), name:'Skin Fade', price:55, duration:40},
+    {id:uid(), name:'Beard Trim & Shape', price:30, duration:20},
+    {id:uid(), name:'Hot Towel Shave', price:40, duration:30},
+    {id:uid(), name:'Kids Cut', price:35, duration:25},
+    {id:uid(), name:'Full Grooming Package', price:95, duration:60}
+  ];
+  const clients = [
+    {id:uid(), name:'Marcus Reed', phone:'(215) 555-0142', notes:'Fade #2 sides, scissor top. Prefers 8:30am slots.'},
+    {id:uid(), name:'Devon Alexander', phone:'(215) 555-0198', notes:'Sensitive skin — go light on the line-up.'},
+    {id:uid(), name:'Isaiah Brooks', phone:'(267) 555-0110', notes:'Regular, every 3 weeks. Beard trim every visit.'},
+    {id:uid(), name:'Tyrell Wallace', phone:'(215) 555-0177', notes:'New client, referred by Marcus.'}
+  ];
+  const barbers = [
+    {id:uid(), name:'Sam Ceasar', role:'Owner / Master Barber · Cranial Prosthetic & Medical Wig Consultant', statusToday:'in'},
+    {id:uid(), name:'Marcus DeShawn', role:'Barber', statusToday:'in'},
+    {id:uid(), name:'Jalen Ortiz', role:'Barber', statusToday:'off'}
+  ];
+  function blankChecks(extra){
+    const o={}; CLIENT_READY_ITEMS.forEach(i=>o[i.id]=false);
+    if(extra) MOBILE_READY_ITEMS.forEach(i=>o[i.id]=false);
+    return o;
+  }
+  const appointments = [
+    (()=>{ const c=blankChecks(); ['confirmed','service','apptok','barber','notes','station','clippers','trimmers','guards','cape','towels','products','paymethod'].forEach(k=>c[k]=true);
+      return {id:uid(), clientId:clients[0].id, clientName:clients[0].name, serviceId:services[0].id, service:services[0].name, price:services[0].price,
+        date:today, time:'08:30', type:'shop', barberId:barbers[1].id, mobile:null, checks:c, status:'scheduled', paymentMethod:'Card', paymentCollected:false, reviewRequested:false}; })(),
+    (()=>{ const c=blankChecks(); CLIENT_READY_ITEMS.forEach(i=>c[i.id]=true);
+      return {id:uid(), clientId:clients[2].id, clientName:clients[2].name, serviceId:services[1].id, service:services[1].name, price:services[1].price,
+        date:today, time:'10:00', type:'shop', barberId:barbers[0].id, mobile:null, checks:c, status:'completed', paymentMethod:'Cash', paymentCollected:true, reviewRequested:true}; })(),
+    (()=>{ const c=blankChecks(true); ['confirmed','service','apptok','barber'].forEach(k=>c[k]=true); c['m_address']=true; c['m_traveltime']=true;
+      return {id:uid(), clientId:clients[3].id, clientName:clients[3].name, serviceId:services[2].id, service:services[2].name, price:services[2].price,
+        date:today, time:'14:00', type:'mobile', barberId:barbers[1].id,
+        mobile:{address:'2200 Fairmount Ave, Philadelphia, PA', travelFee:20, travelTime:'25 min', window:'2:00–2:30 PM', routeStatus:'Not started'},
+        checks:c, status:'scheduled', paymentMethod:'Zelle', paymentCollected:false, reviewRequested:false}; })()
+  ];
+  const payments = appointments.filter(a=>a.paymentCollected).map(a=>({id:uid(), apptId:a.id, date:a.date, client:a.clientName, service:a.service, amount:a.price, method:a.paymentMethod, stream:a.type}));
+
+  const consultChecks = {}; CONSULT_READY_ITEMS.forEach(i=>consultChecks[i.id]=false);
+  ['inquiry','discovery'].forEach(k=>consultChecks[k]=true);
+  const consultations = [
+    {id:uid(), clientName:'Robert Nguyen', phone:'(215) 555-0221', type:'Cranial Prosthetic', date:today, time:'16:00',
+      checks:JSON.parse(JSON.stringify(consultChecks)),
+      intake:{stress:'', sleep:'', work:'', home:'', eating:'', exercise:'', changes:'', screen:''},
+      insuranceStatus:'Not Started', fee:150, feeCollected:false, referralSource:'Groom Factory Foundation', status:'scheduled'}
+  ];
+
+  function boolMap(arr){ const o={}; arr.forEach((_,i)=>o[i]=false); return o; }
+
+  return {
+    shopReady:false,
+    samStatus:'in',
+    services, clients, appointments, payments, barbers, consultations,
+    photos:{}, reviews:{},
+    promos:[
+      {id:uid(), title:'Instagram Booking Push', desc:'Booking link pinned in bio + weekly story reminder.', status:'active'},
+      {id:uid(), title:'Private Consultation Campaign', desc:'"Schedule Your Private Consultation" CTA for the cranial prosthetic & medical wig line.', status:'active'}
+    ],
+    partners:[
+      {id:uid(), name:'FLI Nation Grooming Lounge', type:'Host Partner', notes:'Elevate. Enhance. Empower. — hosts consultations and joint services.'},
+      {id:uid(), name:'Groom Factory Foundation', type:'Nonprofit / Community', notes:'Building Futures. Inspiring Legacies. — mentorship, community grooming events, and referrals.'}
+    ],
+    referrals:[],
+    shopChecks:{opening:boolMap(OPENING_ITEMS), sanitation:boolMap(SANITATION_ITEMS), closing:boolMap(CLOSING_ITEMS)},
+    kitChecks:boolMap(KIT_ITEMS)
+  };
+}
+
+/* ================= STATE PERSIST ================= */
+const STORE_KEY = 'sccc-ceasar-state-v1';
+let state = null;
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(raw) state = JSON.parse(raw);
+  }catch(e){ console.error('load failed', e); }
+  if(!state) state = seedState();
+  if(!state.barbers) state.barbers = seedState().barbers;
+  if(!state.consultations) state.consultations = [];
+  if(!state.partners) state.partners = [];
+  if(!state.referrals) state.referrals = [];
+  if(state.shopReady===undefined) state.shopReady = !!state.barberReady;
+  if(!state.samStatus) state.samStatus = 'in';
+}
+function saveState(){
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){ console.error('save failed', e); }
+}
+
+/* ================= TABS ================= */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('view-'+btn.dataset.view).classList.add('active');
+  });
+});
+
+/* ================= READY TOGGLE / SAM STATUS ================= */
+document.getElementById('readyToggle').addEventListener('click', ()=>{
+  state.shopReady = !state.shopReady;
+  saveState(); renderReady(); renderAlerts();
+});
+function renderReady(){
+  const btn = document.getElementById('readyToggle');
+  const txt = document.getElementById('readyText');
+  btn.classList.toggle('on', state.shopReady);
+  txt.textContent = state.shopReady ? 'SHOP READY' : 'PREP MODE';
+  document.getElementById('samStatusSel').value = state.samStatus;
+}
+document.getElementById('samStatusSel').addEventListener('change', e=>{
+  state.samStatus = e.target.value;
+  saveState(); renderAlerts();
+});
+
+/* ================= APPOINTMENT HELPERS ================= */
+function applicableItems(appt){
+  return appt.type==='mobile' ? CLIENT_READY_ITEMS.concat(MOBILE_READY_ITEMS) : CLIENT_READY_ITEMS;
+}
+function apptProgress(appt){
+  const items = applicableItems(appt);
+  const done = items.filter(i=>appt.checks[i.id]).length;
+  return {done, total:items.length, pct: items.length? done/items.length*100:0};
+}
+function todaysAppointments(){
+  return state.appointments.filter(a=>a.date===todayStr()).sort((a,b)=>a.time.localeCompare(b.time));
+}
+function barberName(id){
+  const b = state.barbers.find(x=>x.id===id);
+  return b ? b.name : 'Unassigned';
+}
+function samId(){
+  const s = state.barbers.find(b=>b.name==='Sam Ceasar');
+  return s ? s.id : null;
+}
+function nextUpcoming(){
+  const now = new Date();
+  return state.appointments
+    .filter(a=>a.date===todayStr() && a.status==='scheduled')
+    .map(a=>({a, dt:new Date(a.date+'T'+a.time+':00')}))
+    .filter(x=>x.dt>=now)
+    .sort((x,y)=>x.dt-y.dt)[0];
+}
+
+/* ================= RENDER: MASTHEAD SNAPSHOT / ALERTS / CLOCK ================= */
+function renderSnapshot(){
+  const list = todaysAppointments();
+  const completed = list.filter(a=>a.status==='completed');
+  const todayPayments = state.payments.filter(p=>p.date===todayStr());
+  const revenueToday = todayPayments.reduce((s,p)=>s+Number(p.amount||0),0);
+  const avgTicket = todayPayments.length ? revenueToday/todayPayments.length : 0;
+  document.getElementById('snapshot').innerHTML = `
+    <div class="snap-cell"><div class="snap-num">${list.length}</div><div class="snap-label">Booked Today</div></div>
+    <div class="snap-cell"><div class="snap-num">${completed.length}</div><div class="snap-label">Completed</div></div>
+    <div class="snap-cell"><div class="snap-num">${fmtMoney(revenueToday)}</div><div class="snap-label">Revenue Today</div></div>
+    <div class="snap-cell"><div class="snap-num">${fmtMoney(avgTicket)}</div><div class="snap-label">Avg Ticket</div></div>
+  `;
+}
+
+function tick(){
+  const now = new Date();
+  document.getElementById('liveClock').innerHTML = now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'}) + ' &middot; ' + now.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+
+  const nu = nextUpcoming();
+  if(nu){
+    const {a, dt} = nu;
+    document.getElementById('nuName').textContent = a.clientName;
+    document.getElementById('nuDetail').textContent = `${a.service} · ${fmtTime12(a.time)} · ${barberName(a.barberId)} · ${a.type==='mobile'?'Mobile':'In-shop'}`;
+    let remain = Math.max(0, dt-now);
+    const h = String(Math.floor(remain/3600000)).padStart(2,'0');
+    const m = String(Math.floor((remain%3600000)/60000)).padStart(2,'0');
+    const s = String(Math.floor((remain%60000)/1000)).padStart(2,'0');
+    document.getElementById('cdValue').textContent = `${h}:${m}:${s}`;
+    document.getElementById('cdLabel').textContent = 'TIME TO NEXT CLIENT';
+  } else {
+    document.getElementById('nuName').textContent = 'No more clients booked today';
+    document.getElementById('nuDetail').textContent = 'Book the next appointment from the Today tab.';
+    document.getElementById('cdValue').textContent = '—';
+    document.getElementById('cdLabel').textContent = 'CLEAR';
+  }
+  renderSnapshot();
+  renderAlerts();
+}
+
+function renderAlerts(){
+  const list = [];
+  const now = new Date();
+  const nu = nextUpcoming();
+
+  if(nu){
+    const minsOut = Math.round((nu.dt-now)/60000);
+    const stationItems = ['station','clippers','trimmers','guards','cape','towels','products'];
+    const stationDone = stationItems.every(k=>nu.a.checks[k]);
+    if(minsOut<=15 && !stationDone){
+      list.push({level:'crit', text:`<b>${nu.a.clientName}</b> is in ${minsOut<0?'the chair now':minsOut+' min'} and station prep isn't complete. Finish the CLIENT READY checklist now.`});
+    }
+    if(minsOut<=30 && !state.shopReady){
+      list.push({level:'warn', text:`Mark <b>SHOP READY</b> before ${nu.a.clientName} arrives at ${fmtTime12(nu.a.time)}.`});
+    }
+    if(nu.a.type==='mobile' && nu.a.mobile && nu.a.mobile.routeStatus==='Not started' && minsOut<=30){
+      list.push({level:'warn', text:`Mobile appointment with <b>${nu.a.clientName}</b> starts soon — update route status before you head out.`});
+    }
+  }
+
+  if(state.samStatus!=='in'){
+    const samAppts = state.appointments.filter(a=>a.date===todayStr() && a.status==='scheduled' && a.barberId===samId());
+    if(samAppts.length){
+      list.push({level:'warn', text:`Sam is marked <b>${state.samStatus==='teaching'?'Teaching':'Consulting'}</b> today — ${samAppts.length} appointment${samAppts.length===1?'':'s'} still assigned to him. Reassign to a barber who's in.`});
+    }
+  }
+
+  state.appointments.filter(a=>a.status==='completed' && !a.paymentCollected).forEach(a=>{
+    list.push({level:'crit', text:`Payment not collected for <b>${a.clientName}</b> — ${a.service}, ${fmtMoney(a.price)}.`});
+  });
+  state.appointments.filter(a=>a.status==='completed' && (!a.checks.before || !a.checks.after)).forEach(a=>{
+    list.push({level:'info', text:`Missing before/after photo for <b>${a.clientName}</b> — grab it for the portfolio before the next client.`});
+  });
+  state.appointments.filter(a=>a.status==='completed' && a.checks.review && !state.reviews[a.id]).forEach(a=>{
+    list.push({level:'info', text:`<b>${a.clientName}</b> was asked for a review — log the response on the Reviews tab.`});
+  });
+  state.consultations.filter(c=>c.status!=='cancelled' && c.insuranceStatus==='Submitted').forEach(c=>{
+    list.push({level:'info', text:`Insurance assistance still pending for <b>${c.clientName}</b> — follow up on the claim status.`});
+  });
+  if(!state.promos.some(p=>p.status==='active')){
+    list.push({level:'info', text:`No active promotion running right now — check the Marketing tab for ready-made ideas.`});
+  }
+
+  const alertsEl = document.getElementById('alerts');
+  if(list.length===0){
+    alertsEl.innerHTML = `<div class="alert-empty">No alerts right now — the shop is running clean.</div>`;
+  } else {
+    alertsEl.innerHTML = list.slice(0,6).map(a=>`
+      <div class="alert ${a.level}">
+        <span class="a-tag">${a.level==='crit'?'⚠ attention':a.level==='warn'?'heads up':'note'}</span>
+        <span class="a-body">${a.text}</span>
+      </div>
+    `).join('');
+  }
+}
+
+/* ================= RENDER: TODAY / APPOINTMENTS ================= */
+function checklistHTML(appt){
+  const groups = appt.type==='mobile'
+    ? [{title:'CLIENT READY', items:CLIENT_READY_ITEMS},{title:'MOBILE READY', items:MOBILE_READY_ITEMS}]
+    : [{title:'CLIENT READY', items:CLIENT_READY_ITEMS}];
+  return groups.map(g=>`
+    <div class="checklist-title">${g.title}</div>
+    ${g.items.map(it=>`
+      <div class="item-row ${appt.checks[it.id]?'checked':''}">
+        <input type="checkbox" class="checkbox" ${appt.checks[it.id]?'checked':''} data-appt="${appt.id}" data-item="${it.id}">
+        <span class="item-text">${it.label}</span>
+      </div>
+    `).join('')}
+  `).join('');
+}
+
+function renderApptCard(appt){
+  const prog = apptProgress(appt);
+  const div = document.createElement('div');
+  div.className = 'appt-card';
+  div.id = 'appt-'+appt.id;
+  const mobileLine = appt.type==='mobile' && appt.mobile
+    ? `<div class="section-sub" style="margin-top:8px;">📍 ${appt.mobile.address||'address pending'} &middot; travel ${appt.mobile.travelTime||'—'} &middot; window ${appt.mobile.window||'—'} &middot; route: <b style="color:var(--gold-bright)">${appt.mobile.routeStatus||'Not started'}</b></div>`
+    : '';
+  div.innerHTML = `
+    <div class="appt-head" data-toggle="${appt.id}">
+      <div class="appt-time">${fmtTime12(appt.time)}</div>
+      <div class="appt-main">
+        <div class="appt-client">${appt.clientName}</div>
+        <div class="appt-service">${appt.service} · ${barberName(appt.barberId)}</div>
+        <div class="appt-badges" style="margin-top:6px;">
+          <span class="badge ${appt.type}">${appt.type==='mobile'?'Mobile':'In-Shop'}</span>
+          <span class="badge status-${appt.status}">${appt.status}</span>
+        </div>
+      </div>
+      <div class="appt-price">${fmtMoney(appt.price)}</div>
+      <div class="appt-progress-wrap">
+        <div class="bar-track"><div class="bar-fill" style="width:${prog.pct}%"></div></div>
+        <div class="section-sub" style="text-align:right;margin-top:3px;">${prog.done}/${prog.total}</div>
+      </div>
+      <span class="chev">▾</span>
+    </div>
+    <div class="appt-body">
+      ${mobileLine}
+      <div class="form-grid" style="margin-top:10px;">
+        <label class="field">Assigned barber
+          <select class="mini-select" data-barberappt="${appt.id}">
+            ${state.barbers.map(b=>`<option value="${b.id}" ${appt.barberId===b.id?'selected':''}>${b.name}${b.statusToday!=='in'?' (off today)':''}</option>`).join('')}
+          </select>
+        </label>
+      </div>
+      ${checklistHTML(appt)}
+      <div class="appt-actions-row">
+        <select class="mini-select" data-payappt="${appt.id}">
+          ${['Card','Cash','Zelle','Apple Pay','Venmo'].map(m=>`<option value="${m}" ${appt.paymentMethod===m?'selected':''}>${m}</option>`).join('')}
+        </select>
+        ${appt.type==='mobile'?`
+        <select class="mini-select" data-routeappt="${appt.id}">
+          ${['Not started','En route','Arrived','In service','Completed'].map(r=>`<option value="${r}" ${appt.mobile&&appt.mobile.routeStatus===r?'selected':''}>${r}</option>`).join('')}
+        </select>`:''}
+        <button class="btn-ghost" data-completeappt="${appt.id}">${appt.status==='completed'?'Reopen':'Mark Completed'}</button>
+        <button class="btn-danger" data-cancelappt="${appt.id}">Cancel</button>
+      </div>
+    </div>
+  `;
+  return div;
+}
+
+function renderApptList(){
+  const wrap = document.getElementById('apptList');
+  wrap.innerHTML = '';
+  document.getElementById('todayDateLabel').textContent = dayLabel(todayStr());
+  const list = todaysAppointments();
+  if(list.length===0){
+    wrap.innerHTML = `<div class="empty-state">Nothing on the books today. Book the first appointment above.</div>`;
+    return;
+  }
+  list.forEach(a=> wrap.appendChild(renderApptCard(a)));
+
+  wrap.querySelectorAll('[data-toggle]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      document.getElementById('appt-'+el.dataset.toggle).classList.toggle('open');
+    });
+  });
+  wrap.querySelectorAll('.checkbox[data-appt]').forEach(cb=>{
+    cb.addEventListener('change', e=>{
+      const appt = state.appointments.find(a=>a.id===e.target.dataset.appt);
+      appt.checks[e.target.dataset.item] = e.target.checked;
+      if(e.target.dataset.item==='paid' && e.target.checked){
+        logPaymentIfNeeded(appt);
+      }
+      const items = applicableItems(appt);
+      if(items.every(i=>appt.checks[i.id])) appt.status = 'completed';
+      saveState();
+      renderAll();
+    });
+  });
+  wrap.querySelectorAll('[data-barberappt]').forEach(sel=>{
+    sel.addEventListener('change', e=>{
+      const appt = state.appointments.find(a=>a.id===e.target.dataset.barberappt);
+      appt.barberId = e.target.value;
+      saveState(); renderAll();
+    });
+  });
+  wrap.querySelectorAll('[data-payappt]').forEach(sel=>{
+    sel.addEventListener('change', e=>{
+      const appt = state.appointments.find(a=>a.id===e.target.dataset.payappt);
+      appt.paymentMethod = e.target.value;
+      const pay = state.payments.find(p=>p.apptId===appt.id);
+      if(pay) pay.method = e.target.value;
+      saveState();
+    });
+  });
+  wrap.querySelectorAll('[data-routeappt]').forEach(sel=>{
+    sel.addEventListener('change', e=>{
+      const appt = state.appointments.find(a=>a.id===e.target.dataset.routeappt);
+      if(appt.mobile) appt.mobile.routeStatus = e.target.value;
+      appt.checks.m_route = true;
+      saveState(); renderAll();
+    });
+  });
+  wrap.querySelectorAll('[data-completeappt]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const appt = state.appointments.find(a=>a.id===btn.dataset.completeappt);
+      appt.status = appt.status==='completed' ? 'scheduled' : 'completed';
+      saveState(); renderAll();
+    });
+  });
+  wrap.querySelectorAll('[data-cancelappt]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const appt = state.appointments.find(a=>a.id===btn.dataset.cancelappt);
+      appt.status = 'cancelled';
+      saveState(); renderAll();
+    });
+  });
+}
+
+function logPaymentIfNeeded(appt){
+  appt.paymentCollected = true;
+  if(!state.payments.some(p=>p.apptId===appt.id)){
+    state.payments.push({id:uid(), apptId:appt.id, date:appt.date, client:appt.clientName, service:appt.service, amount:appt.price, method:appt.paymentMethod||'Card', stream:appt.type});
+  }
+}
+
+/* ---- Appointment form ---- */
+function toggleApptForm(){
+  const box = document.getElementById('apptForm');
+  const opening = box.style.display==='none';
+  box.style.display = opening ? 'block' : 'none';
+  if(opening) box.innerHTML = apptFormHTML();
+  bindApptForm();
+}
+document.getElementById('addApptBtn').addEventListener('click', toggleApptForm);
+
+function apptFormHTML(){
+  return `
+    <div class="form-grid">
+      <label class="field">Client
+        <select id="f-client">
+          <option value="">— new client —</option>
+          ${state.clients.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}
+        </select>
+      </label>
+      <label class="field">New client name <input type="text" id="f-newname" placeholder="Full name"></label>
+      <label class="field">Phone <input type="tel" id="f-phone" placeholder="(215) 555-0100"></label>
+      <label class="field">Service
+        <select id="f-service">
+          ${state.services.map(s=>`<option value="${s.id}">${s.name} — ${fmtMoney(s.price)}</option>`).join('')}
+        </select>
+      </label>
+      <label class="field">Barber
+        <select id="f-barber">
+          ${state.barbers.map(b=>`<option value="${b.id}">${b.name}${b.statusToday!=='in'?' (off today)':''}</option>`).join('')}
+        </select>
+      </label>
+      <label class="field">Date <input type="date" id="f-date" value="${todayStr()}"></label>
+      <label class="field">Time <input type="time" id="f-time" value="09:00"></label>
+      <label class="field">Type
+        <select id="f-type">
+          <option value="shop">In-Shop</option>
+          <option value="mobile">Mobile / A La Carte</option>
+        </select>
+      </label>
+    </div>
+    <div class="form-grid" id="f-mobile-fields" style="display:none;">
+      <label class="field">Client address <input type="text" id="f-address" placeholder="Street, city"></label>
+      <label class="field">Travel fee ($) <input type="number" id="f-travelfee" placeholder="20"></label>
+      <label class="field">Travel time <input type="text" id="f-traveltime" placeholder="25 min"></label>
+      <label class="field">Appointment window <input type="text" id="f-window" placeholder="2:00–2:30 PM"></label>
+    </div>
+    <div class="form-actions">
+      <button class="btn-gold" id="f-save">Save Appointment</button>
+      <button class="btn-ghost" id="f-cancel">Cancel</button>
+    </div>
+  `;
+}
+function bindApptForm(){
+  const typeSel = document.getElementById('f-type');
+  if(!typeSel) return;
+  typeSel.addEventListener('change', ()=>{
+    document.getElementById('f-mobile-fields').style.display = typeSel.value==='mobile' ? 'grid' : 'none';
+  });
+  document.getElementById('f-cancel').addEventListener('click', toggleApptForm);
+  document.getElementById('f-save').addEventListener('click', ()=>{
+    const clientSel = document.getElementById('f-client').value;
+    let clientId, clientName;
+    const newName = document.getElementById('f-newname').value.trim();
+    if(clientSel){
+      const c = state.clients.find(c=>c.id===clientSel);
+      clientId = c.id; clientName = c.name;
+    } else if(newName){
+      clientId = uid();
+      state.clients.push({id:clientId, name:newName, phone:document.getElementById('f-phone').value.trim(), notes:''});
+      clientName = newName;
+    } else { alert('Choose an existing client or enter a new client name.'); return; }
+
+    const svc = state.services.find(s=>s.id===document.getElementById('f-service').value);
+    const type = document.getElementById('f-type').value;
+    const checks = {}; CLIENT_READY_ITEMS.forEach(i=>checks[i.id]=false);
+    if(type==='mobile') MOBILE_READY_ITEMS.forEach(i=>checks[i.id]=false);
+
+    const appt = {
+      id:uid(), clientId, clientName, serviceId:svc.id, service:svc.name, price:svc.price,
+      date:document.getElementById('f-date').value||todayStr(), time:document.getElementById('f-time').value||'09:00',
+      type, barberId:document.getElementById('f-barber').value,
+      mobile: type==='mobile' ? {
+        address:document.getElementById('f-address').value.trim(),
+        travelFee:Number(document.getElementById('f-travelfee').value)||0,
+        travelTime:document.getElementById('f-traveltime').value.trim(),
+        window:document.getElementById('f-window').value.trim(),
+        routeStatus:'Not started'
+      } : null,
+      checks, status:'scheduled', paymentMethod:'Card', paymentCollected:false, reviewRequested:false
+    };
+    state.appointments.push(appt);
+    saveState();
+    toggleApptForm();
+    renderAll();
+  });
+}
+
+/* ================= RENDER: SHOP OPS ================= */
+function renderShopSection(key, items, bodyId, cntId){
+  const body = document.getElementById(bodyId);
+  const done = items.filter((_,i)=>state.shopChecks[key][i]).length;
+  document.getElementById(cntId).textContent = `${done}/${items.length}`;
+  body.innerHTML = items.map((label,i)=>`
+    <div class="item-row ${state.shopChecks[key][i]?'checked':''}">
+      <input type="checkbox" class="checkbox" ${state.shopChecks[key][i]?'checked':''} data-shopkey="${key}" data-idx="${i}">
+      <span class="item-text">${label}</span>
+    </div>
+  `).join('');
+  body.querySelectorAll('.checkbox').forEach(cb=>{
+    cb.addEventListener('change', e=>{
+      state.shopChecks[key][e.target.dataset.idx] = e.target.checked;
+      saveState();
+      renderShopSection(key, items, bodyId, cntId);
+      renderAlerts();
+    });
+  });
+}
+function renderShop(){
+  renderShopSection('opening', OPENING_ITEMS, 'body-opening', 'cnt-opening');
+  renderShopSection('sanitation', SANITATION_ITEMS, 'body-sanitation', 'cnt-sanitation');
+  renderShopSection('closing', CLOSING_ITEMS, 'body-closing', 'cnt-closing');
+}
+
+/* ================= RENDER: SERVICES ================= */
+document.getElementById('addServiceBtn').addEventListener('click', ()=>{
+  const box = document.getElementById('serviceForm');
+  const opening = box.style.display==='none';
+  box.style.display = opening?'block':'none';
+  if(opening){
+    box.innerHTML = `
+      <div class="form-grid">
+        <label class="field">Service name <input type="text" id="s-name" placeholder="e.g. Skin Fade"></label>
+        <label class="field">Price ($) <input type="number" id="s-price" placeholder="45"></label>
+        <label class="field">Duration (min) <input type="number" id="s-duration" placeholder="30"></label>
+      </div>
+      <div class="form-actions">
+        <button class="btn-gold" id="s-save">Add Service</button>
+      </div>`;
+    document.getElementById('s-save').addEventListener('click', ()=>{
+      const name = document.getElementById('s-name').value.trim();
+      if(!name) return alert('Enter a service name.');
+      state.services.push({id:uid(), name, price:Number(document.getElementById('s-price').value)||0, duration:Number(document.getElementById('s-duration').value)||30});
+      saveState(); box.style.display='none'; renderAll();
+    });
+  }
+});
+function renderServices(){
+  const wrap = document.getElementById('serviceList');
+  wrap.innerHTML = state.services.map(s=>`
+    <div class="list-row">
+      <div><div class="list-name">${s.name}</div><div class="list-sub">${s.duration} min</div></div>
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div class="list-stat">${fmtMoney(s.price)}</div>
+        <button class="btn-danger" data-delsvc="${s.id}">Remove</button>
+      </div>
+    </div>
+  `).join('') || `<div class="empty-state">No services yet.</div>`;
+  wrap.querySelectorAll('[data-delsvc]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      state.services = state.services.filter(s=>s.id!==btn.dataset.delsvc);
+      saveState(); renderAll();
+    });
+  });
+}
+
+/* ================= RENDER: CONSULTATIONS ================= */
+document.getElementById('addConsultBtn').addEventListener('click', ()=>{
+  const box = document.getElementById('consultForm');
+  const opening = box.style.display==='none';
+  box.style.display = opening?'block':'none';
+  if(opening){
+    box.innerHTML = `
+      <div class="form-grid">
+        <label class="field">Client name <input type="text" id="cn-name" placeholder="Full name"></label>
+        <label class="field">Phone <input type="tel" id="cn-phone" placeholder="(215) 555-0100"></label>
+        <label class="field">Type
+          <select id="cn-type"><option>Cranial Prosthetic</option><option>Medical Wig</option><option>Both</option></select>
+        </label>
+        <label class="field">Date <input type="date" id="cn-date" value="${todayStr()}"></label>
+        <label class="field">Time <input type="time" id="cn-time" value="15:00"></label>
+        <label class="field">Consultation fee ($) <input type="number" id="cn-fee" placeholder="150"></label>
+        <label class="field">Referral source <input type="text" id="cn-source" placeholder="e.g. Groom Factory Foundation, Instagram, Referral"></label>
+      </div>
+      <div class="form-actions">
+        <button class="btn-gold" id="cn-save">Save Consultation</button>
+        <button class="btn-ghost" id="cn-cancel">Cancel</button>
+      </div>`;
+    document.getElementById('cn-cancel').addEventListener('click', ()=>{ box.style.display='none'; });
+    document.getElementById('cn-save').addEventListener('click', ()=>{
+      const name = document.getElementById('cn-name').value.trim();
+      if(!name) return alert('Enter the client\'s name.');
+      const checks = {}; CONSULT_READY_ITEMS.forEach(i=>checks[i.id]=false);
+      state.consultations.push({
+        id:uid(), clientName:name, phone:document.getElementById('cn-phone').value.trim(),
+        type:document.getElementById('cn-type').value,
+        date:document.getElementById('cn-date').value||todayStr(), time:document.getElementById('cn-time').value||'15:00',
+        checks, intake:{stress:'',sleep:'',work:'',home:'',eating:'',exercise:'',changes:'',screen:''},
+        insuranceStatus:'Not Started', fee:Number(document.getElementById('cn-fee').value)||0, feeCollected:false,
+        referralSource:document.getElementById('cn-source').value.trim(), status:'scheduled'
+      });
+      saveState(); box.style.display='none'; renderAll();
+    });
+  }
+});
+function consultProgress(c){
+  const done = CONSULT_READY_ITEMS.filter(i=>c.checks[i.id]).length;
+  return {done, total:CONSULT_READY_ITEMS.length, pct: done/CONSULT_READY_ITEMS.length*100};
+}
+function renderConsultations(){
+  const wrap = document.getElementById('consultList');
+  const list = state.consultations.slice().sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time));
+  wrap.innerHTML = '';
+  if(list.length===0){
+    wrap.innerHTML = `<div class="empty-state">No consultations booked yet.</div>`;
+    return;
+  }
+  list.forEach(c=>{
+    const prog = consultProgress(c);
+    const div = document.createElement('div');
+    div.className = 'appt-card';
+    div.id = 'consult-'+c.id;
+    div.innerHTML = `
+      <div class="appt-head" data-ctoggle="${c.id}">
+        <div class="appt-time">${c.date===todayStr()?fmtTime12(c.time):c.date}</div>
+        <div class="appt-main">
+          <div class="appt-client">${c.clientName}</div>
+          <div class="appt-service">${c.type}${c.referralSource?' · via '+c.referralSource:''}</div>
+          <div class="appt-badges" style="margin-top:6px;">
+            <span class="badge private">🔒 Private</span>
+            <span class="badge status-${c.status}">${c.status}</span>
+          </div>
+        </div>
+        <div class="appt-price">${fmtMoney(c.fee)}</div>
+        <div class="appt-progress-wrap">
+          <div class="bar-track"><div class="bar-fill" style="width:${prog.pct}%"></div></div>
+          <div class="section-sub" style="text-align:right;margin-top:3px;">${prog.done}/${prog.total}</div>
+        </div>
+        <span class="chev">▾</span>
+      </div>
+      <div class="appt-body">
+        <div class="checklist-title">CONSULTATION READY</div>
+        ${CONSULT_READY_ITEMS.map(it=>`
+          <div class="item-row ${c.checks[it.id]?'checked':''}">
+            <input type="checkbox" class="checkbox" ${c.checks[it.id]?'checked':''} data-cchk="${c.id}" data-item="${it.id}">
+            <span class="item-text">${it.label}</span>
+          </div>
+        `).join('')}
+        <div class="checklist-title">LIFE &amp; HAIR-HEALTH DISCOVERY</div>
+        ${INTAKE_QUESTIONS.map(q=>`
+          <div class="intake-q">
+            <label>${q.q}</label>
+            <input type="text" data-intake="${c.id}" data-qid="${q.id}" value="${escAttr(c.intake[q.id])}" placeholder="Notes from the conversation...">
+          </div>
+        `).join('')}
+        <div class="form-grid" style="margin-top:6px;">
+          <label class="field">Insurance assistance status
+            <select data-insurance="${c.id}">
+              ${['Not Started','Submitted','Approved','Denied','N/A'].map(s=>`<option value="${s}" ${c.insuranceStatus===s?'selected':''}>${s}</option>`).join('')}
+            </select>
+          </label>
+          <label class="field">Consultation fee ($) <input type="number" data-feeval="${c.id}" value="${c.fee}"></label>
+        </div>
+        <div class="appt-actions-row">
+          <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);">
+            <input type="checkbox" class="checkbox" data-feecollected="${c.id}" ${c.feeCollected?'checked':''}> Fee collected
+          </label>
+          <button class="btn-ghost" data-completeconsult="${c.id}">${c.status==='completed'?'Reopen':'Mark Completed'}</button>
+          <button class="btn-danger" data-cancelconsult="${c.id}">Cancel</button>
+        </div>
+        <div class="lock-note">🔒 Confidential — private, appointment-only consultation. Not shared with the general client roster.</div>
+      </div>
+    `;
+    wrap.appendChild(div);
+  });
+
+  wrap.querySelectorAll('[data-ctoggle]').forEach(el=>{
+    el.addEventListener('click', ()=> document.getElementById('consult-'+el.dataset.ctoggle).classList.toggle('open'));
+  });
+  wrap.querySelectorAll('[data-cchk]').forEach(cb=>{
+    cb.addEventListener('change', e=>{
+      const c = state.consultations.find(x=>x.id===e.target.dataset.cchk);
+      c.checks[e.target.dataset.item] = e.target.checked;
+      if(CONSULT_READY_ITEMS.every(i=>c.checks[i.id])) c.status='completed';
+      saveState(); renderAll();
+    });
+  });
+  wrap.querySelectorAll('[data-intake]').forEach(inp=>{
+    inp.addEventListener('input', e=>{
+      const c = state.consultations.find(x=>x.id===e.target.dataset.intake);
+      c.intake[e.target.dataset.qid] = e.target.value;
+      saveState();
+    });
+  });
+  wrap.querySelectorAll('[data-insurance]').forEach(sel=>{
+    sel.addEventListener('change', e=>{
+      const c = state.consultations.find(x=>x.id===e.target.dataset.insurance);
+      c.insuranceStatus = e.target.value; c.checks.insurance = true;
+      saveState(); renderAll();
+    });
+  });
+  wrap.querySelectorAll('[data-feeval]').forEach(inp=>{
+    inp.addEventListener('change', e=>{
+      const c = state.consultations.find(x=>x.id===e.target.dataset.feeval);
+      c.fee = Number(e.target.value)||0;
+      saveState(); renderAll();
+    });
+  });
+  wrap.querySelectorAll('[data-feecollected]').forEach(cb=>{
+    cb.addEventListener('change', e=>{
+      const c = state.consultations.find(x=>x.id===e.target.dataset.feecollected);
+      c.feeCollected = e.target.checked;
+      if(e.target.checked && !state.payments.some(p=>p.apptId===c.id)){
+        state.payments.push({id:uid(), apptId:c.id, date:c.date, client:c.clientName, service:c.type+' Consultation', amount:c.fee, method:'Card', stream:'consultation'});
+      }
+      saveState(); renderAll();
+    });
+  });
+  wrap.querySelectorAll('[data-completeconsult]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const c = state.consultations.find(x=>x.id===btn.dataset.completeconsult);
+      c.status = c.status==='completed'?'scheduled':'completed';
+      saveState(); renderAll();
+    });
+  });
+  wrap.querySelectorAll('[data-cancelconsult]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const c = state.consultations.find(x=>x.id===btn.dataset.cancelconsult);
+      c.status = 'cancelled';
+      saveState(); renderAll();
+    });
+  });
+}
+
+/* ================= RENDER: CLIENTS ================= */
+document.getElementById('addClientBtn').addEventListener('click', ()=>{
+  const box = document.getElementById('clientForm');
+  const opening = box.style.display==='none';
+  box.style.display = opening?'block':'none';
+  if(opening){
+    box.innerHTML = `
+      <div class="form-grid">
+        <label class="field">Name <input type="text" id="c-name" placeholder="Full name"></label>
+        <label class="field">Phone <input type="tel" id="c-phone" placeholder="(215) 555-0100"></label>
+      </div>
+      <label class="field">Notes <textarea id="c-notes" rows="2" placeholder="Cut preferences, allergies, anything worth remembering"></textarea></label>
+      <div class="form-actions" style="margin-top:10px;">
+        <button class="btn-gold" id="c-save">Add Client</button>
+      </div>`;
+    document.getElementById('c-save').addEventListener('click', ()=>{
+      const name = document.getElementById('c-name').value.trim();
+      if(!name) return alert('Enter a client name.');
+      state.clients.push({id:uid(), name, phone:document.getElementById('c-phone').value.trim(), notes:document.getElementById('c-notes').value.trim()});
+      saveState(); box.style.display='none'; renderAll();
+    });
+  }
+});
+function renderClients(){
+  const wrap = document.getElementById('clientList');
+  wrap.innerHTML = state.clients.map(c=>{
+    const visits = state.appointments.filter(a=>a.clientId===c.id && a.status==='completed');
+    const spent = state.payments.filter(p=>state.appointments.find(a=>a.id===p.apptId && a.clientId===c.id)).reduce((s,p)=>s+Number(p.amount||0),0);
+    const last = visits.slice().sort((a,b)=>b.date.localeCompare(a.date))[0];
+    return `
+      <div class="list-row">
+        <div>
+          <div class="list-name">${c.name}</div>
+          <div class="list-sub">${c.phone||'no phone on file'}${c.notes?' · '+c.notes:''}</div>
+        </div>
+        <div>
+          <div class="list-stat">${fmtMoney(spent)} lifetime</div>
+          <div class="list-stat-sub">${visits.length} visit${visits.length===1?'':'s'}${last?' · last '+last.date:''}</div>
+        </div>
+      </div>
+    `;
+  }).join('') || `<div class="empty-state">No clients yet.</div>`;
+}
+
+/* ================= RENDER: STAFF ================= */
+document.getElementById('addStaffBtn').addEventListener('click', ()=>{
+  const box = document.getElementById('staffForm');
+  const opening = box.style.display==='none';
+  box.style.display = opening?'block':'none';
+  if(opening){
+    box.innerHTML = `
+      <div class="form-grid">
+        <label class="field">Name <input type="text" id="st-name" placeholder="Full name"></label>
+        <label class="field">Role <input type="text" id="st-role" placeholder="Barber"></label>
+      </div>
+      <div class="form-actions">
+        <button class="btn-gold" id="st-save">Add Barber</button>
+      </div>`;
+    document.getElementById('st-save').addEventListener('click', ()=>{
+      const name = document.getElementById('st-name').value.trim();
+      if(!name) return alert('Enter a name.');
+      state.barbers.push({id:uid(), name, role:document.getElementById('st-role').value.trim()||'Barber', statusToday:'in'});
+      saveState(); box.style.display='none'; renderAll();
+    });
+  }
+});
+function renderStaff(){
+  const wrap = document.getElementById('staffList');
+  wrap.innerHTML = state.barbers.map(b=>{
+    const todaysCount = todaysAppointments().filter(a=>a.barberId===b.id).length;
+    return `
+    <div class="staff-card">
+      <div>
+        <div class="staff-name">${b.name}</div>
+        <div class="staff-role">${b.role} · ${todaysCount} booked today</div>
+      </div>
+      <select data-staffstatus="${b.id}" class="mini-select">
+        <option value="in" ${b.statusToday==='in'?'selected':''}>In Shop</option>
+        <option value="off" ${b.statusToday==='off'?'selected':''}>Off Today</option>
+        <option value="consulting" ${b.statusToday==='consulting'?'selected':''}>Private Consultation</option>
+        <option value="teaching" ${b.statusToday==='teaching'?'selected':''}>Teaching a Class</option>
+      </select>
+    </div>`;
+  }).join('') || `<div class="empty-state">No staff added yet.</div>`;
+  wrap.querySelectorAll('[data-staffstatus]').forEach(sel=>{
+    sel.addEventListener('change', e=>{
+      const b = state.barbers.find(x=>x.id===e.target.dataset.staffstatus);
+      b.statusToday = e.target.value;
+      if(b.name==='Sam Ceasar'){ state.samStatus = e.target.value; }
+      saveState(); renderAll();
+    });
+  });
+}
+
+/* ================= RENDER: PAYMENTS ================= */
+function renderPayments(){
+  const all = state.payments.slice().sort((a,b)=>b.date.localeCompare(a.date));
+  const today = all.filter(p=>p.date===todayStr()).reduce((s,p)=>s+Number(p.amount||0),0);
+  const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate()-6);
+  const week = all.filter(p=>new Date(p.date)>=weekAgo).reduce((s,p)=>s+Number(p.amount||0),0);
+  const total = all.reduce((s,p)=>s+Number(p.amount||0),0);
+  document.getElementById('paySnap').innerHTML = `
+    <div class="stat-cell"><div class="stat-num">${fmtMoney(today)}</div><div class="stat-label">Today</div></div>
+    <div class="stat-cell"><div class="stat-num">${fmtMoney(week)}</div><div class="stat-label">Last 7 Days</div></div>
+    <div class="stat-cell"><div class="stat-num">${fmtMoney(total)}</div><div class="stat-label">All Time</div></div>
+    <div class="stat-cell"><div class="stat-num">${all.length}</div><div class="stat-label">Transactions</div></div>
+  `;
+  const wrap = document.getElementById('paymentList');
+  wrap.innerHTML = all.map(p=>`
+    <div class="list-row">
+      <div><div class="list-name">${p.client}</div><div class="list-sub">${p.service} · ${p.date} · ${p.stream||'shop'}</div></div>
+      <div><div class="list-stat">${fmtMoney(p.amount)}</div><div class="list-stat-sub">${p.method}</div></div>
+    </div>
+  `).join('') || `<div class="empty-state">No payments logged yet — collect payment from an appointment's checklist.</div>`;
+}
+
+/* ================= RENDER: PHOTOS ================= */
+function renderPhotos(){
+  const wrap = document.getElementById('photoList');
+  const appts = state.appointments.filter(a=>a.status!=='cancelled').slice().sort((a,b)=>b.date.localeCompare(a.date));
+  wrap.innerHTML = appts.map(a=>{
+    const p = state.photos[a.id] || {};
+    return `
+    <div class="promo-card">
+      <div class="promo-top">
+        <div><div class="promo-title">${a.clientName} — ${a.service}</div><div class="list-sub">${a.date} · ${fmtTime12(a.time)}</div></div>
+        <div class="appt-badges">
+          <span class="badge ${a.checks.before?'status-completed':'status-scheduled'}">Before ${a.checks.before?'✓':'—'}</span>
+          <span class="badge ${a.checks.after?'status-completed':'status-scheduled'}">After ${a.checks.after?'✓':'—'}</span>
+        </div>
+      </div>
+      <div class="form-grid" style="margin-top:10px;">
+        <div class="photo-slot">
+          <span class="photo-slot-label">Before photo</span>
+          ${p.beforeImg?`<img class="photo-thumb" src="${p.beforeImg}">`:''}
+          <input type="file" accept="image/*" data-photo="before" data-appt="${a.id}">
+        </div>
+        <div class="photo-slot">
+          <span class="photo-slot-label">After photo</span>
+          ${p.afterImg?`<img class="photo-thumb" src="${p.afterImg}">`:''}
+          <input type="file" accept="image/*" data-photo="after" data-appt="${a.id}">
+        </div>
+      </div>
+    </div>`;
+  }).join('') || `<div class="empty-state">No appointments yet to attach photos to.</div>`;
+
+  wrap.querySelectorAll('[data-photo]').forEach(inp=>{
+    inp.addEventListener('change', e=>{
+      const file = e.target.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = ()=>{
+        const apptId = e.target.dataset.appt;
+        const slot = e.target.dataset.photo;
+        if(!state.photos[apptId]) state.photos[apptId] = {};
+        state.photos[apptId][slot+'Img'] = reader.result;
+        const appt = state.appointments.find(a=>a.id===apptId);
+        appt.checks[slot] = true;
+        try{ saveState(); }catch(err){ alert('Image too large to store locally — try a smaller photo.'); }
+        renderAll();
+      };
+      reader.readAsDataURL(file);
+    });
+  });
+}
+
+/* ================= RENDER: REVIEWS ================= */
+function renderReviews(){
+  const wrap = document.getElementById('reviewList');
+  const list = state.appointments.filter(a=>a.status==='completed' && a.checks.review);
+  wrap.innerHTML = list.map(a=>{
+    const r = state.reviews[a.id] || {rating:0, comment:'', followUp:false};
+    return `
+    <div class="promo-card">
+      <div class="promo-top">
+        <div><div class="promo-title">${a.clientName}</div><div class="list-sub">${a.service} · ${a.date}</div></div>
+        <div class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</div>
+      </div>
+      <div class="form-grid" style="margin-top:10px;">
+        <label class="field">Rating
+          <select data-revrating="${a.id}">
+            <option value="0" ${r.rating===0?'selected':''}>Pending</option>
+            ${[1,2,3,4,5].map(n=>`<option value="${n}" ${r.rating===n?'selected':''}>${n} star${n===1?'':'s'}</option>`).join('')}
+          </select>
+        </label>
+        <label class="field" style="grid-column:span 2;">Comment
+          <input type="text" data-revcomment="${a.id}" value="${escAttr(r.comment)}" placeholder="What they said...">
+        </label>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12.5px;color:var(--muted);">
+        <input type="checkbox" class="checkbox" data-revfollow="${a.id}" ${r.followUp?'checked':''}> Follow-up sent (thank you / rebooking nudge)
+      </label>
+    </div>`;
+  }).join('') || `<div class="empty-state">No review requests yet — they'll appear once a checklist marks "Client review requested."</div>`;
+
+  wrap.querySelectorAll('[data-revrating]').forEach(sel=>{
+    sel.addEventListener('change', e=>{
+      ensureReview(e.target.dataset.revrating).rating = Number(e.target.value);
+      saveState(); renderReviews();
+    });
+  });
+  wrap.querySelectorAll('[data-revcomment]').forEach(inp=>{
+    inp.addEventListener('input', e=>{
+      ensureReview(e.target.dataset.revcomment).comment = e.target.value;
+      saveState();
+    });
+  });
+  wrap.querySelectorAll('[data-revfollow]').forEach(cb=>{
+    cb.addEventListener('change', e=>{
+      ensureReview(e.target.dataset.revfollow).followUp = e.target.checked;
+      saveState(); renderAlerts();
+    });
+  });
+}
+function ensureReview(apptId){
+  if(!state.reviews[apptId]) state.reviews[apptId] = {rating:0, comment:'', followUp:false};
+  return state.reviews[apptId];
+}
+
+/* ================= RENDER: MARKETING ================= */
+document.getElementById('addPromoBtn').addEventListener('click', ()=>{
+  const box = document.getElementById('promoForm');
+  const opening = box.style.display==='none';
+  box.style.display = opening?'block':'none';
+  if(opening){
+    box.innerHTML = `
+      <div class="form-grid">
+        <label class="field" style="grid-column:span 2;">Title <input type="text" id="p-title" placeholder="e.g. Summer Fade Special"></label>
+        <label class="field">Status
+          <select id="p-status"><option value="planned">Planned</option><option value="active">Active</option><option value="ended">Ended</option></select>
+        </label>
+      </div>
+      <label class="field">Description <textarea id="p-desc" rows="2" placeholder="What's the offer and who's it for"></textarea></label>
+      <div class="form-actions" style="margin-top:10px;"><button class="btn-gold" id="p-save">Save Promo</button></div>`;
+    document.getElementById('p-save').addEventListener('click', ()=>{
+      const title = document.getElementById('p-title').value.trim();
+      if(!title) return alert('Give the promo a title.');
+      state.promos.push({id:uid(), title, desc:document.getElementById('p-desc').value.trim(), status:document.getElementById('p-status').value});
+      saveState(); box.style.display='none'; renderAll();
+    });
+  }
+});
+function renderMarketing(){
+  const wrap = document.getElementById('promoList');
+  wrap.innerHTML = state.promos.map(p=>`
+    <div class="promo-card">
+      <div class="promo-top">
+        <div class="promo-title">${p.title}</div>
+        <span class="badge ${p.status==='active'?'status-completed':p.status==='ended'?'status-cancelled':'status-scheduled'}">${p.status}</span>
+      </div>
+      <div class="promo-desc">${p.desc||''}</div>
+    </div>
+  `).join('') || `<div class="empty-state">No promotions yet.</div>`;
+  document.getElementById('ideaStrip').innerHTML = IDEAS.map(([tag,text])=>`<div class="idea-chip"><b>${tag}</b>${text}</div>`).join('');
+}
+
+/* ================= RENDER: PARTNERS ================= */
+document.getElementById('addPartnerBtn').addEventListener('click', ()=>{
+  const box = document.getElementById('partnerForm');
+  const opening = box.style.display==='none';
+  box.style.display = opening?'block':'none';
+  if(opening){
+    box.innerHTML = `
+      <div class="form-grid">
+        <label class="field">Name <input type="text" id="pt-name" placeholder="Organization name"></label>
+        <label class="field">Type <input type="text" id="pt-type" placeholder="Host Partner / Nonprofit / Referral"></label>
+      </div>
+      <label class="field">Notes <textarea id="pt-notes" rows="2" placeholder="What the relationship is"></textarea></label>
+      <div class="form-actions" style="margin-top:10px;"><button class="btn-gold" id="pt-save">Add Partner</button></div>`;
+    document.getElementById('pt-save').addEventListener('click', ()=>{
+      const name = document.getElementById('pt-name').value.trim();
+      if(!name) return alert('Enter a partner name.');
+      state.partners.push({id:uid(), name, type:document.getElementById('pt-type').value.trim()||'Partner', notes:document.getElementById('pt-notes').value.trim()});
+      saveState(); box.style.display='none'; renderAll();
+    });
+  }
+});
+document.getElementById('addReferralBtn').addEventListener('click', ()=>{
+  const box = document.getElementById('referralForm');
+  const opening = box.style.display==='none';
+  box.style.display = opening?'block':'none';
+  if(opening){
+    box.innerHTML = `
+      <div class="form-grid">
+        <label class="field">Source <input type="text" id="rf-source" placeholder="e.g. Groom Factory Foundation"></label>
+        <label class="field">Client name <input type="text" id="rf-client" placeholder="Full name"></label>
+        <label class="field">Date <input type="date" id="rf-date" value="${todayStr()}"></label>
+        <label class="field">Outcome
+          <select id="rf-outcome"><option>Pending</option><option>Booked</option><option>No-show</option><option>Not interested</option></select>
+        </label>
+      </div>
+      <div class="form-actions"><button class="btn-gold" id="rf-save">Log Referral</button></div>`;
+    document.getElementById('rf-save').addEventListener('click', ()=>{
+      const client = document.getElementById('rf-client').value.trim();
+      if(!client) return alert('Enter the client name.');
+      state.referrals.push({id:uid(), source:document.getElementById('rf-source').value.trim(), client, date:document.getElementById('rf-date').value||todayStr(), outcome:document.getElementById('rf-outcome').value});
+      saveState(); box.style.display='none'; renderAll();
+    });
+  }
+});
+function renderPartners(){
+  document.getElementById('partnerList').innerHTML = state.partners.map(p=>`
+    <div class="promo-card">
+      <div class="promo-top"><div class="promo-title">${p.name}</div><span class="badge private">${p.type}</span></div>
+      <div class="promo-desc">${p.notes||''}</div>
+    </div>
+  `).join('') || `<div class="empty-state">No partners added yet.</div>`;
+  document.getElementById('referralList').innerHTML = state.referrals.slice().sort((a,b)=>b.date.localeCompare(a.date)).map(r=>`
+    <div class="list-row">
+      <div><div class="list-name">${r.client}</div><div class="list-sub">via ${r.source||'—'} · ${r.date}</div></div>
+      <span class="badge ${r.outcome==='Booked'?'status-completed':r.outcome==='No-show'||r.outcome==='Not interested'?'status-cancelled':'status-scheduled'}">${r.outcome}</span>
+    </div>
+  `).join('') || `<div class="empty-state">No referrals logged yet.</div>`;
+}
+
+/* ================= RENDER: DASHBOARD ================= */
+function renderDashboard(){
+  const all = state.payments;
+  const total = all.reduce((s,p)=>s+Number(p.amount||0),0);
+  const today = all.filter(p=>p.date===todayStr()).reduce((s,p)=>s+Number(p.amount||0),0);
+  const completedAppts = state.appointments.filter(a=>a.status==='completed');
+  const completedConsults = state.consultations.filter(c=>c.status==='completed');
+  const avgTicket = all.length ? total/all.length : 0;
+  const clientVisitCounts = {};
+  state.appointments.filter(a=>a.status==='completed').forEach(a=>{ clientVisitCounts[a.clientId]=(clientVisitCounts[a.clientId]||0)+1; });
+  const returning = Object.values(clientVisitCounts).filter(n=>n>1).length;
+  const newClients = Object.values(clientVisitCounts).filter(n=>n===1).length;
+
+  document.getElementById('dashStats').innerHTML = `
+    <div class="stat-cell"><div class="stat-num">${fmtMoney(today)}</div><div class="stat-label">Revenue Today</div></div>
+    <div class="stat-cell"><div class="stat-num">${fmtMoney(total)}</div><div class="stat-label">Revenue All-Time</div></div>
+    <div class="stat-cell"><div class="stat-num">${fmtMoney(avgTicket)}</div><div class="stat-label">Avg Ticket</div></div>
+    <div class="stat-cell"><div class="stat-num">${completedAppts.length}</div><div class="stat-label">Cuts Completed</div></div>
+    <div class="stat-cell"><div class="stat-num">${completedConsults.length}</div><div class="stat-label">Consultations Completed</div></div>
+    <div class="stat-cell"><div class="stat-num">${returning}</div><div class="stat-label">Returning Clients</div></div>
+    <div class="stat-cell"><div class="stat-num">${newClients}</div><div class="stat-label">New Clients</div></div>
+  `;
+
+  const days = [];
+  for(let i=6;i>=0;i--){ const d=new Date(); d.setDate(d.getDate()-i); days.push(d.toISOString().slice(0,10)); }
+  const dayTotals = days.map(d=>all.filter(p=>p.date===d).reduce((s,p)=>s+Number(p.amount||0),0));
+  const max = Math.max(1, ...dayTotals);
+  document.getElementById('revChart').innerHTML = days.map((d,i)=>`
+    <div class="chart-col">
+      <div class="chart-val">${dayTotals[i]?fmtMoney(dayTotals[i]):''}</div>
+      <div class="chart-bar" style="height:${Math.max(2,dayTotals[i]/max*100)}%;"></div>
+      <div class="chart-label">${new Date(d+'T00:00:00').toLocaleDateString('en-US',{weekday:'short'})}</div>
+    </div>
+  `).join('');
+
+  const svcTotals = {};
+  all.forEach(p=>{ svcTotals[p.service] = (svcTotals[p.service]||0)+Number(p.amount||0); });
+  const svcArr = Object.entries(svcTotals).sort((a,b)=>b[1]-a[1]);
+  const svcMax = Math.max(1, ...svcArr.map(x=>x[1]));
+  document.getElementById('topServices').innerHTML = svcArr.length ? svcArr.map(([name,val])=>`
+    <div class="hbar-row">
+      <div class="hbar-label">${name}</div>
+      <div class="hbar-track"><div class="hbar-fill" style="width:${val/svcMax*100}%"></div></div>
+      <div class="hbar-val">${fmtMoney(val)}</div>
+    </div>
+  `).join('') : `<div class="empty-state">No revenue logged yet.</div>`;
+
+  const streamTotals = {shop:0, mobile:0, consultation:0};
+  all.forEach(p=>{ const s=p.stream||'shop'; streamTotals[s]=(streamTotals[s]||0)+Number(p.amount||0); });
+  const stMax = Math.max(1, streamTotals.shop, streamTotals.mobile, streamTotals.consultation);
+  document.getElementById('revStream').innerHTML = `
+    <div class="hbar-row"><div class="hbar-label">In-Shop Haircuts</div><div class="hbar-track"><div class="hbar-fill" style="width:${streamTotals.shop/stMax*100}%"></div></div><div class="hbar-val">${fmtMoney(streamTotals.shop)}</div></div>
+    <div class="hbar-row"><div class="hbar-label">Mobile / A La Carte</div><div class="hbar-track"><div class="hbar-fill" style="width:${streamTotals.mobile/stMax*100}%"></div></div><div class="hbar-val">${fmtMoney(streamTotals.mobile)}</div></div>
+    <div class="hbar-row"><div class="hbar-label">Consultations</div><div class="hbar-track"><div class="hbar-fill" style="width:${streamTotals.consultation/stMax*100}%"></div></div><div class="hbar-val">${fmtMoney(streamTotals.consultation)}</div></div>
+  `;
+}
+
+/* ================= RENDER: MOBILE TAB ================= */
+function renderMobileTab(){
+  const wrap = document.getElementById('mobileApptList');
+  const list = state.appointments.filter(a=>a.type==='mobile').sort((a,b)=>a.date.localeCompare(b.date)||a.time.localeCompare(b.time));
+  wrap.innerHTML = list.map(a=>`
+    <div class="promo-card">
+      <div class="promo-top">
+        <div><div class="promo-title">${a.clientName} — ${a.service}</div><div class="list-sub">${a.date} · ${fmtTime12(a.time)} · ${barberName(a.barberId)}</div></div>
+        <span class="badge status-${a.status}">${a.status}</span>
+      </div>
+      <div class="promo-desc">
+        📍 ${a.mobile?.address||'—'}<br>
+        Travel fee ${fmtMoney(a.mobile?.travelFee||0)} · Travel time ${a.mobile?.travelTime||'—'} · Window ${a.mobile?.window||'—'}<br>
+        Route status: <b style="color:var(--gold-bright)">${a.mobile?.routeStatus||'Not started'}</b>
+      </div>
+    </div>
+  `).join('') || `<div class="empty-state">No mobile / a la carte appointments booked. Add one from the Today tab and set type to Mobile.</div>`;
+
+  renderKit();
+}
+function renderKit(){
+  const done = KIT_ITEMS.filter((_,i)=>state.kitChecks[i]).length;
+  document.getElementById('cnt-kit').textContent = `${done}/${KIT_ITEMS.length}`;
+  const body = document.getElementById('body-kit');
+  body.innerHTML = KIT_ITEMS.map((label,i)=>`
+    <div class="item-row ${state.kitChecks[i]?'checked':''}">
+      <input type="checkbox" class="checkbox" ${state.kitChecks[i]?'checked':''} data-kit="${i}">
+      <span class="item-text">${label}</span>
+    </div>
+  `).join('');
+  body.querySelectorAll('.checkbox').forEach(cb=>{
+    cb.addEventListener('change', e=>{
+      state.kitChecks[e.target.dataset.kit] = e.target.checked;
+      saveState(); renderKit();
+    });
+  });
+}
+
+/* ================= RENDER ALL ================= */
+function renderAll(){
+  renderApptList();
+  renderShop();
+  renderServices();
+  renderConsultations();
+  renderClients();
+  renderStaff();
+  renderPayments();
+  renderPhotos();
+  renderReviews();
+  renderMarketing();
+  renderPartners();
+  renderDashboard();
+  renderMobileTab();
+  renderReady();
+  tick();
+}
+
+/* ================= INIT ================= */
+loadState();
+renderAll();
+setInterval(tick, 1000);
+</script>
+</body>
+</html>
